@@ -1,0 +1,25 @@
+%% Mira — AI-Powered Project Intelligence Assistant — Architecture
+flowchart TD
+    A([Chat Trigger<br/>user request]) --> B[Google Drive<br/>Search files & folders<br/>folder-scoped read]
+    B --> C[Filter - all proj files]
+    C --> D{Switch<br/>route by file name}
+    D --> F1[project_description.txt]
+    D --> F2[sample_task_board.csv]
+    D --> F3[project_risks.csv]
+    D --> F4[project_timeline.csv]
+    F1 --> E[Task Board Counts<br/>Code node: deterministic totals]
+    F2 --> E
+    F3 --> E
+    F4 --> E
+    E --> O{Orchestrator Agent<br/>intent classification + routing}
+    O -->|project plan| P1[Planner Agent]
+    O -->|risk| P2[Risk Assessor Agent]
+    O -->|status| P3[Status Reporter Agent]
+    O -->|milestones / tracking| P4[Milestone Tracker Agent]
+    O -->|stakeholder email| P5[Stakeholder Update Generator Agent]
+    P1 --> R([Chat Response])
+    P2 --> R
+    P3 --> R
+    P4 --> R
+    P5 --> R
+    R --> L[(Langfuse<br/>observability trace)]
