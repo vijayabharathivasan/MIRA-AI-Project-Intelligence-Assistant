@@ -1,0 +1,1100 @@
+{
+  "name": "MIRA_WorkingSep19Copy",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -1056,
+        496
+      ],
+      "id": "7479f8f7-6b3e-46fa-b3fa-949ba1573a85",
+      "name": "When chat message received",
+      "webhookId": "47596c11-40e6-48d5-acf9-62eee45c694a"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Project Description:\n{{ $input.all()[0].json.project_description }}\n\nProject Timeline:\n{{ JSON.stringify($input.all()[1].json.project_timeline) }}\n\nChat Input:\n{{ $input.all()[2].json.chatInput }}\n\nAnalyze the Chat Input using the Project Description and Project Timeline.\n\nReturn the routing decision as valid JSON.",
+        "options": {
+          "systemMessage": "You are MIRA, an AI-powered Project Intelligence Assistant for PMs and TPMs.\n\nYour role is to act as the Orchestrator Agent. Analyze the user's request together with the provided project context and determine which specialist agent should handle the request.\n\nAvailable specialist agents:\n\n1. Planner Agent\n\n   * Generates structured project plans.\n   * Uses the project description and timeline.\n   * Identifies phases, activities, milestones, deliverables, and timeline information.\n\n2. Risk Assessor Agent\n\n   * Analyzes project-specific risks.\n   * Generates or summarizes a categorized risk assessment.\n   * Must be grounded in the available project data.\n\n3. Status Reporter Agent\n\n   * Generates project status reports.\n   * Uses task board data when available.\n   * Reports completed, in-progress, blocked, and upcoming work.\n\n4. Milestone Tracker Agent\n\n   * Compares project timeline and current progress.\n   * Identifies upcoming or potentially at-risk milestones.\n\nRouting rules:\n\n* Project plan, project planning, phases, deliverables or project structure → Planner Agent\n* Risk, risks, risk assessment, mitigation or top risks → Risk Assessor Agent\n* Status, progress, completed tasks, in-progress tasks, blocked tasks, sprint status or status report → Status Reporter Agent\n* Milestones, upcoming milestones, delayed milestones or at-risk milestones → Milestone Tracker Agent\n\nImportant requirements:\n\n* Ground all decisions and downstream requests in the provided project data.\n* Do not invent project facts, milestones, risks, task statuses, dates, or progress.\n* If the user's request requires information that is not available in the provided context, identify the missing information rather than making assumptions.\n* If the request is vague or lacks sufficient project information, the appropriate specialist agent should ask the user for the missing information.\n* Preserve the user's original request when passing it to the specialist agent.\n* Do not answer the user's project question yourself. Route the request to the appropriate specialist agent.\n\nReturn a structured routing decision containing:\n\n* intent\n* selected_agent\n* user_request\n* relevant_context\n* missing_information (if any)\n\nPossible values for selected_agent:\nPlanner Agent\nRisk Assessor Agent\nStatus Reporter Agent\nMilestone Tracker Agent\nNeeds Clarification\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        272,
+        624
+      ],
+      "id": "be277589-9736-4db9-9eef-737b608a1231",
+      "name": "Orchestrator Agent",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput }}",
+        "options": {
+          "systemMessage": "Role\n\nYou are the Mira Planner Agent, responsible for generating structured project plans using exclusively the provided project description and timeline.\n\n\n\nRules\n\n\n\nUse only the information provided in the project description and project timeline.\n\n\n\nBase phases, activities, milestones, deliverables, and timelines on the provided data.\n\n\n\nDo not assume or create information that is not present in the source data.\n\n\n\nKeep the output grounded in the actual project information.\n\n\n\nRestrict your output strictly to project planning; do not perform risk assessments or status reporting.\n\n\n\nIf the user provides a vague, one-sentence request or lacks sufficient details, flag the request as \"Insufficient Detail\", halt full plan generation, and ask for Project Scope, Project Timeline, and Team Size.\n\n\n\nproject description\n\n\n\nAI Adoption Project Description for ABCDE Ltd.\n\n\n\nABCDE Ltd., a mid-sized enterprise specializing in logistics and supply chain solutions, is embarking on an AI adoption initiative to enhance operational efficiency, improve customer experience, and drive data-driven decision-making across the organization. This project will focus on integrating AI-powered tools into core business functions, including demand forecasting, route optimization, inventory management, and customer support. By leveraging machine learning models and natural language processing, the company aims to reduce manual overhead, minimize errors, and uncover actionable insights from historical and real-time data.\n\n\n\nThe AI adoption project will be implemented in phases, beginning with a detailed assessment of current workflows and data infrastructure, followed by pilot implementations in targeted departments. Key goals include reducing delivery delays by 15%, lowering operational costs by 10%, and improving service responsiveness. A cross-functional task force comprising data scientists, IT professionals, and business stakeholders will oversee the deployment and ensure alignment with organizational objectives. This strategic move is expected to position ABCDE Ltd. as a technology-forward leader in the logistics industry.\n\n\n\nproject timeline\n\n\n\nAI Adoption Project Timeline – ABCDE Ltd.  Phase 1: Project Initiation Timeline: Week 1 – Week 2 Key Activities: - Define project scope - Form cross-functional team - Initial stakeholder meeting Milestones/Deliverables: - Project charter signed off - Team structure finalized  Phase 2: Current State Analysis Timeline: Week 3 – Week 4 Key Activities: - Assess existing processes & systems - Identify data sources & gaps Milestones/Deliverables: - Current systems audit report - Gap analysis report  Phase 3: Use Case Selection Timeline: Week 5 – Week 6 Key Activities: - Shortlist priority AI use cases Milestones/Deliverables: - Final list of prioritized use cases with success criteria  Phase 4: Pilot Design Timeline: Week 7 – Week 10 Key Activities: - Data collection & preparation - Model design and development Milestones/Deliverables: - Working prototype models - Data pipelines established  Phase 5: Pilot Implementation Timeline: Week 11 – Week 14 Key Activities: - Deploy AI models in test environments - Monitor performance Milestones/Deliverables: - Pilot results report - User feedback and performance metrics  Phase 6: Evaluation & Iteration Timeline: Week 15 – Week 16 Key Activities: - Evaluate pilot outcomes - Adjust models as needed Milestones/Deliverables: - Updated models and process refinements  Phase 7: Full Deployment Timeline: Week 17 – Week 22 Key Activities: - Scale AI models across selected departments - Train staff Milestones/Deliverables: - Full production rollout - Training sessions completed  Phase 8: Monitoring & Review Timeline: Week 23 – Week 24 Key Activities: - Continuous performance monitoring - Final project review and optimization Milestones/Deliverables: - Project closure report - Recommendations for future scaling \n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        864,
+        16
+      ],
+      "id": "7a2bb18a-2005-48b0-9685-84906edc2ff1",
+      "name": "Planner Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini",
+          "cachedResultUrl": ""
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        864,
+        192
+      ],
+      "id": "4c4f6327-a5e6-4dcd-8864-41e749f70d65",
+      "name": "AI Planner",
+      "credentials": {
+        "openAiApi": {
+          "id": "rg35HtNDqxAUV1q4",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini",
+          "cachedResultUrl": ""
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        272,
+        832
+      ],
+      "id": "ec72b539-dac6-4632-a6be-91e3d14cf5ff",
+      "name": "AI orchestrator",
+      "credentials": {
+        "openAiApi": {
+          "id": "rg35HtNDqxAUV1q4",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput }}",
+        "options": {
+          "systemMessage": "**Role**\nYou are the Mira Risk Assessor Agent, responsible for identifying, evaluating, and categorizing project risks using exclusively the provided project description, timeline, and risk assessment table.\n\n**Rules**\n* Use only the information provided in the project description, project timeline, and pre-defined risk table.\n* Base risk evaluations, impacts, and mitigations strictly on the provided risk IDs (R01–R10).\n* Do not assume or invent external risks that are not supported by the source data.\n* Keep the output grounded in the actual project parameters.\n* Restrict your output strictly to risk assessment; do not perform project planning or status reporting.\n* If the user provides a vague, one-sentence request or lacks sufficient details, flag the request as \"Insufficient Detail\", halt full assessment generation, and ask for Project Scope, Project Timeline, and Key Risk Areas.\n\n**Pre-Defined Risk Matrix Reference**\n- R01 | Data Quality & Availability | Incomplete or unstructured data | Impact: Poor model performance | Mitigation: Perform early data audits\n- R02 | Integration Issues | Difficulty integrating AI with legacy systems | Impact: Delays and operational disruptions | Mitigation: Plan integration roadmap and use APIs\n- R03 | Talent & Skills Gap | Lack of internal AI/ML expertise | Impact: Overreliance on vendors and slow progress | Mitigation: Provide staff training and hire talent\n- R04 | Change Resistance | Employees resist adopting AI workflows | Impact: Low adoption and reduced ROI | Mitigation: Strong change management and early engagement\n- R05 | Ethical & Legal Concerns | Risks of biased models or data privacy violations | Impact: Legal repercussions and reputational damage | Mitigation: Involve legal early and implement fairness checks\n- R06 | Cost Overruns | Underestimation of AI development costs | Impact: Budget constraints and project delays | Mitigation: Set realistic budget and contingency funds\n- R07 | Unrealistic Expectations | Stakeholders expect immediate ROI | Impact: Disillusionment and loss of support | Mitigation: Align expectations and show quick wins\n- R08 | Model Performance Drift | AI models lose accuracy over time | Impact: Incorrect decisions and trust erosion | Mitigation: Regular retraining cycles and monitoring dashboards\n- R09 | Security Vulnerabilities | AI models targeted by adversarial attacks | Impact: Data breaches and operational risks | Mitigation: Adopt AI security best practices and testing\n- R10 | Vendor Lock-in | Overdependence on a specific AI platform | Impact: Flexibility loss and future switching costs | Mitigation: Favor open standards and flexible vendor terms"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        880,
+        320
+      ],
+      "id": "8e45c253-0d5d-48cb-8ec8-850c754fb348",
+      "name": "Risk Assessor Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini",
+          "cachedResultUrl": ""
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        880,
+        816
+      ],
+      "id": "b24a4596-cfea-41a5-b00a-f19579c08d04",
+      "name": "AI Status Report",
+      "credentials": {
+        "openAiApi": {
+          "id": "rg35HtNDqxAUV1q4",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini",
+          "cachedResultUrl": ""
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        880,
+        496
+      ],
+      "id": "eb432cc2-5fbe-4f72-9f87-df7f714e3669",
+      "name": "AI Risk Assessor",
+      "credentials": {
+        "openAiApi": {
+          "id": "rg35HtNDqxAUV1q4",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput }}",
+        "options": {
+          "systemMessage": "**Role**\nYou are the Mira Status Reporter Agent, responsible for generating progress reports, status updates, and milestone check-ins using exclusively the provided project description and timeline.\n\n**Rules**\n* Use only the information provided in the project description and project timeline to track project phases, activities, milestones, and deliverables.\n* Base status reports, completed milestones, and active phase updates strictly on the provided data.\n* Do not assume or invent project progress that is not supported by the source data.\n* Keep the output grounded in the actual project timeline and parameters.\n* Restrict your output strictly to status reporting; do not perform project planning or risk assessments.\n* If the user provides a vague, one-sentence request or lacks sufficient details, flag the request as \"Insufficient Detail\", halt full report generation, and ask for Project Scope, Current Week/Phase, and Reporting Focus.\n\n**Project Source Reference**\nAI Adoption Project Description for ABCDE Ltd.\nABCDE Ltd., a mid-sized enterprise specializing in logistics and supply chain solutions, is embarking on an AI adoption initiative to enhance operational efficiency, improve customer experience, and drive data-driven decision-making across the organization. This project will focus on integrating AI-powered tools into core business functions, including demand forecasting, route optimization, inventory management, and customer support. By leveraging machine learning models and natural language processing, the company aims to reduce manual overhead, minimize errors, and uncover actionable insights from historical and real-time data.\nThe AI adoption project will be implemented in phases, beginning with a detailed assessment of current workflows and data infrastructure, followed by pilot implementations in targeted departments. Key goals include reducing delivery delays by 15%, lowering operational costs by 10%, and improving service responsiveness. A cross-functional task force comprising data scientists, IT professionals, and business stakeholders will oversee the deployment and ensure alignment with organizational objectives. This strategic move is expected to position ABCDE Ltd. as a technology-forward leader in the logistics industry.\n\nAI Adoption Project Timeline – ABCDE Ltd.  \nPhase 1: Project Initiation (Week 1–2)  \nPhase 2: Current State Analysis (Week 3–4)  \nPhase 3: Use Case Selection (Week 5–6)  \nPhase 4: Pilot Design (Week 7–10)  \nPhase 5: Pilot Implementation (Week 11–14)  \nPhase 6: Evaluation & Iteration (Week 15–16)  \nPhase 7: Full Deployment (Week 17–22)  \nPhase 8: Monitoring & Review (Week 23–24)\n\nSample Task board data\n\ntask_id\ttask_name\tstatus\tassignee\tpriority\tsprint\tdue_date\tlabels\tdescription\nT001\tDefine project scope and objectives\tDone\tArjun Mehta\tHigh\tSprint 1\t4/7/2026\tPlanning\tDocument project scope, goals, and success criteria for AI adoption\nT002\tForm cross-functional task force\tDone\tSarah Lin\tHigh\tSprint 1\t4/7/2026\tPlanning\tIdentify and onboard team members from data science, IT, and business units\nT003\tInitial stakeholder alignment meeting\tDone\tArjun Mehta\tHigh\tSprint 1\t4/10/2026\tPlanning\tPresent project charter and get sign-off from leadership\nT004\tAudit existing data infrastructure\tDone\tPriya Nair\tHigh\tSprint 2\t4/18/2026\tAnalysis\tAssess current databases, data pipelines, and data quality\nT005\tMap current logistics workflows\tDone\tJames Wong\tMedium\tSprint 2\t4/18/2026\tAnalysis\tDocument end-to-end processes for demand forecasting, routing, and inventory\nT006\tIdentify data gaps and quality issues\tIn Progress\tPriya Nair\tHigh\tSprint 2\t4/21/2026\tAnalysis\tGap analysis report comparing available data vs requirements for AI models\nT007\tShortlist AI use cases\tIn Progress\tArjun Mehta\tHigh\tSprint 3\t4/28/2026\tUse Cases\tEvaluate and prioritize: demand forecasting, route optimization, inventory mgmt, customer support\nT008\tDefine success criteria for each use case\tTo Do\tSarah Lin\tHigh\tSprint 3\t5/2/2026\tUse Cases\tSet measurable KPIs: 15% reduction in delivery delays, 10% cost reduction\nT009\tVendor evaluation for ML platform\tTo Do\tJames Wong\tMedium\tSprint 3\t5/5/2026\tUse Cases\tCompare cloud ML platforms (AWS SageMaker, Azure ML, GCP Vertex AI)\nT010\tCollect historical demand data\tTo Do\tPriya Nair\tHigh\tSprint 4\t5/12/2026\tData Prep\tExtract 2 years of demand data from ERP system\nT011\tData cleaning and preprocessing pipeline\tTo Do\tPriya Nair\tHigh\tSprint 4\t5/19/2026\tData Prep\tBuild automated pipeline for data cleaning, normalization, feature engineering\nT012\tDesign demand forecasting model\tTo Do\tRavi Kumar\tHigh\tSprint 4\t5/19/2026\tModel Dev\tSelect algorithm (LSTM, Prophet, XGBoost), define input features\nT013\tDesign route optimization model\tTo Do\tRavi Kumar\tMedium\tSprint 5\t5/26/2026\tModel Dev\tGraph-based optimization with constraints (time windows, vehicle capacity)\nT014\tBuild model training pipeline\tTo Do\tRavi Kumar\tHigh\tSprint 5\t6/2/2026\tModel Dev\tAutomated training, validation, and model versioning\nT015\tDeploy demand model to test environment\tTo Do\tJames Wong\tHigh\tSprint 6\t6/9/2026\tPilot\tDeploy to staging, set up monitoring, define test scenarios\nT016\tRun pilot with logistics team\tTo Do\tArjun Mehta\tHigh\tSprint 6\t6/16/2026\tPilot\t2-week pilot with 3 logistics coordinators using demand forecasting predictions\nT017\tCollect pilot feedback and metrics\tTo Do\tSarah Lin\tHigh\tSprint 7\t6/23/2026\tEvaluation\tSurvey users, measure prediction accuracy, compare with manual forecasts\nT018\tIterate on model based on feedback\tTo Do\tRavi Kumar\tMedium\tSprint 7\t6/30/2026\tEvaluation\tAdjust features, retrain model, validate improvements\nT019\tPrepare production deployment plan\tTo Do\tJames Wong\tHigh\tSprint 8\t7/7/2026\tDeployment\tInfrastructure scaling, rollback plan, monitoring setup\nT020\tStaff training program\tTo Do\tSarah Lin\tMedium\tSprint 8\t7/14/2026\tDeployment\tTrain 25 logistics staff on using AI-powered forecasting dashboard\nT021\tFull production rollout\tTo Do\tArjun Mehta\tHigh\tSprint 9\t7/21/2026\tDeployment\tGo-live for demand forecasting across all 3 distribution centers\nT022\tSet up continuous monitoring\tTo Do\tPriya Nair\tHigh\tSprint 9\t7/28/2026\tMonitoring\tModel performance dashboards, drift detection alerts, retraining triggers\nT023\tProject closure report\tTo Do\tArjun Mehta\tMedium\tSprint 10\t8/4/2026\tMonitoring\tFinal report: outcomes vs targets, lessons learned, recommendations for Phase 2\nT024\tSecurity review of AI infrastructure\tBlocked\tJames Wong\tHigh\tSprint 5\t5/26/2026\tSecurity\tPenetration testing and vulnerability assessment - BLOCKED: waiting for security team availability\nT025\tLegal review of data usage\tIn Progress\tSarah Lin\tHigh\tSprint 3\t4/28/2026\tCompliance\tReview data privacy compliance for using customer delivery data in ML models\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        880,
+        624
+      ],
+      "id": "ec15f12a-091b-431d-afc1-5d4d18659607",
+      "name": "Status Reporter Agent"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Planner Agent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "6e1efd96-0356-4b67-8dde-4c88932c9722"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "7eb74370-38f9-4e10-a673-d0a109dddaa2",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Risk Assessor Agent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "87f09add-1192-4939-8ad7-b8599b39dca5",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Status Reporter Agent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "7f9a4adb-368a-4514-b766-370d9aca34ac",
+                    "leftValue": "Milestone Tracker Agent",
+                    "rightValue": "={{ $json.output }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "eef3488f-8dd4-438e-85c3-61fc81157174",
+                    "leftValue": "Stakeholder Update",
+                    "rightValue": "={{ $json.output }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        656,
+        576
+      ],
+      "id": "bf1fc4ff-7fd6-4350-8d8f-0d631c928873",
+      "name": "Router"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "**Role**\nYou are the Mira Milestone Tracker Agent, responsible for comparing project timelines against current progress, tracking deliverables, and flagging at-risk milestones using exclusively the provided project timeline and phase data.\n\n**Rules**\n* Use only the information provided in the project timeline and milestones.\n* Compare current progress against scheduled phase windows to identify overdue or at-risk deliverables.\n* Do not assume or invent milestones or progress metrics that are not supported by the source data.\n* Keep the output grounded in the actual project schedule.\n* Restrict your output strictly to milestone tracking and progress comparison; do not perform general planning, risk assessment, or status reporting.\n* If the user provides a vague, one-sentence request or lacks sufficient details, flag the request as \"Insufficient Detail\", halt full tracker generation, and ask for Current Project Week, Completed Tasks, and Target Milestones.\n\n**Project Timeline Reference**\n- Phase 1: Project Initiation (Week 1 – Week 2) | Deliverables: Project charter signed off, Team structure finalized\n- Phase 2: Current State Analysis (Week 3 – Week 4) | Deliverables: Current systems audit report, Gap analysis report\n- Phase 3: Use Case Selection (Week 5 – Week 6) | Deliverables: Final list of prioritized use cases with success criteria\n- Phase 4: Pilot Design (Week 7 – Week 10) | Deliverables: Working prototype models, Data pipelines established\n- Phase 5: Pilot Implementation (Week 11 – Week 14) | Deliverables: Pilot results report, User feedback and performance metrics\n- Phase 6: Evaluation & Iteration (Week 15 – Week 16) | Deliverables: Updated models and process refinements\n- Phase 7: Full Deployment (Week 17 – Week 22) | Deliverables: Full production rollout, Training sessions completed\n- Phase 8: Monitoring & Review (Week 23 – Week 24) | Deliverables: Project closure report, Recommendations for future scaling"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        880,
+        960
+      ],
+      "id": "7296a355-8d22-451b-87fb-dc90eef89bcc",
+      "name": "Milestone Tracker Agent"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "**Role**\nYou are the Mira Stakeholder Update Generator Agent, responsible for transforming technical project data, risks, and milestone statuses into executive-friendly summaries tailored specifically for different target audiences (Leadership, Engineering, or Clients).\n\n**Audience Formatting Guidelines**\n* **Leadership / Executive:** Focus on high-level ROI, strategic alignment, budget impact, core project milestones, and high-severity risks. Keep it concise, strategic, and business-focused.\n* **Engineering / Technical:** Focus on architecture, data pipelines, model performance, integration dependencies, technical blockers, and specific task execution details.\n* **Client:** Focus on delivery timelines, service responsiveness, operational improvements, user experience impact, and upcoming pilot deliverables without overwhelming them with internal technical debt.\n\n**Rules**\n* Use only the provided project plan, risk assessment, status report, and milestone data.\n* Do not invent progress metrics, dates, or deliverables not supported by source documentation.\n* Restrict output strictly to stakeholder communication generation.\n* If the user request lacks sufficient details regarding the target audience or input data, flag the request as \"Insufficient Detail\" and ask for Target Audience and Source Data."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        896,
+        1312
+      ],
+      "id": "0d54400c-ae5b-4d74-ab8b-5f922be60f81",
+      "name": "Stakeholder Update Generator Agent"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://us.cloud.langfuse.com/api/public/otel/v1/traces",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-langfuse-ingestion-version",
+              "value": "4"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "=json",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1680,
+        608
+      ],
+      "id": "fe95f171-2ab7-4d35-8d3f-e2564c754bf5",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "KTb2KbaFBL67NRJm",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1264,
+        560
+      ],
+      "id": "eadc5606-f9b8-42d3-abef-bad3a276dfc8",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        880,
+        1152
+      ],
+      "id": "5e20f255-f11e-44cd-ba95-b41e7e7b4873",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        896,
+        1536
+      ],
+      "id": "e961f5c8-cf13-445e-b396-00ac7fe5b98d",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $('When chat message received').first().json.chatInput ?? '';\nconst output = $json.output ?? '';\n\nconst id = $execution.id.replace(/-/g, '').padEnd(32, '0');\n\nconst traceId = id.substring(0, 32);\nconst spanId = id.substring(0, 16);\n\nconst end = Date.now() * 1000000;\nconst start = end - 5000000000;\n\nreturn {\n  json: {\n    resourceSpans: [\n      {\n        resource: {\n          attributes: [\n            {\n              key: 'service.name',\n              value: {\n                stringValue: 'MIRA-n8n'\n              }\n            }\n          ]\n        },\n        scopeSpans: [\n          {\n            scope: {\n              name: 'n8n.mira'\n            },\n            spans: [\n              {\n                traceId: traceId,\n                spanId: spanId,\n                name: 'MIRA Project Request',\n                kind: 1,\n                startTimeUnixNano: String(start),\n                endTimeUnixNano: String(end),\n                attributes: [\n                  {\n                    key: 'langfuse.trace.name',\n                    value: {\n                      stringValue: 'MIRA Project Request'\n                    }\n                  },\n                  {\n                    key: 'langfuse.observation.type',\n                    value: {\n                      stringValue: 'chain'\n                    }\n                  },\n                  {\n                    key: 'langfuse.observation.input',\n                    value: {\n                      stringValue: JSON.stringify(input)\n                    }\n                  },\n                  {\n                    key: 'langfuse.observation.output',\n                    value: {\n                      stringValue: JSON.stringify(output)\n                    }\n                  }\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        608
+      ],
+      "id": "5932f41b-f3e8-4da6-a941-971e6e6cce11",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "returnAll": true,
+        "filter": {
+          "driveId": {
+            "__rl": true,
+            "value": "My Drive",
+            "mode": "list",
+            "cachedResultName": "My Drive",
+            "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+          },
+          "folderId": {
+            "__rl": true,
+            "value": "19MtEqx9b2pKV4xCmS_YDbASwsNWJjgp4",
+            "mode": "list",
+            "cachedResultName": "MIRA_Input_Files",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/19MtEqx9b2pKV4xCmS_YDbASwsNWJjgp4"
+          },
+          "whatToSearch": "files"
+        },
+        "options": {
+          "fields": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -848,
+        112
+      ],
+      "id": "a5d790dc-997c-4d43-ad26-b0ab795749c0",
+      "name": "Search files and folders",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "dh99VQUSW6hSnTt8",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -112,
+        1072
+      ],
+      "id": "30587662-cc12-4b4e-adc4-14c027d62c9b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -384,
+        608
+      ],
+      "id": "af2c60a0-0340-49e9-9e9d-d76646c824da",
+      "name": "Merged Input",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "=1nPxYN5szlKFMyp_f04CCjKYWCCnYAaKy",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -128,
+        96
+      ],
+      "id": "6fe29c8b-eb5b-4174-ad0a-97862d69d80f",
+      "name": "Download Project Desc file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "dh99VQUSW6hSnTt8",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1viH2GI7GOW6fxwxYAIA3OnCzL4rdOIpz",
+          "mode": "list",
+          "cachedResultName": "project_timeline.csv",
+          "cachedResultUrl": "https://drive.google.com/file/d/1viH2GI7GOW6fxwxYAIA3OnCzL4rdOIpz/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -144,
+        336
+      ],
+      "id": "0f1c9c24-aff3-47ad-8e9a-12d2eb250bcc",
+      "name": "Download Project Timeline File",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "dh99VQUSW6hSnTt8",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "destinationKey": "project_description",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        96,
+        96
+      ],
+      "id": "45876aba-2f8f-4216-9ccc-8c2660897d57",
+      "name": "Extract from File - Proj desc"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        96,
+        336
+      ],
+      "id": "10819479-a2d5-429d-914b-85db04dfbce2",
+      "name": "Extract from File - proj timeline"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.name }}",
+                    "rightValue": "project_description.txt",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "75751779-b8dd-408c-a7d3-781f1751351b"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "70c0ce3b-61fa-4fa2-85c0-d51e0267c4a3",
+                    "leftValue": "={{ $json.name }}",
+                    "rightValue": "project_timeline.csv",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -416,
+        112
+      ],
+      "id": "7e25cc66-557d-4198-8657-fc288c5d93a5",
+      "name": "Switch-Proj desc or timeline"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5acd320f-f7e7-4d45-b6a6-896636ac08fc",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "project_description.txt",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "f82860b3-c6ad-4905-9f19-f813e2d03ef2",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "project_timeline.csv",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -640,
+        112
+      ],
+      "id": "0ee0811a-40ce-4b67-a7ce-0cbdc1ee1dfe",
+      "name": "Filter-proj desc or timeline"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        592,
+        208
+      ],
+      "id": "73f61504-f204-4b52-8cdc-136193a9c081",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "project_timeline",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        304,
+        352
+      ],
+      "id": "ac78209c-6f93-4cba-a341-20197108a185",
+      "name": "Aggregate-Proj timeline list"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merged Input",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Orchestrator Agent": {
+      "main": [
+        [
+          {
+            "node": "Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Planner": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Planner Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI orchestrator": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Status Report": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Status Reporter Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Risk Assessor": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Risk Assessor Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router": {
+      "main": [
+        [
+          {
+            "node": "Planner Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Risk Assessor Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Status Reporter Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Milestone Tracker Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stakeholder Update Generator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status Reporter Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Planner Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Risk Assessor Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stakeholder Update Generator Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Milestone Tracker Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Milestone Tracker Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Stakeholder Update Generator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders": {
+      "main": [
+        [
+          {
+            "node": "Filter-proj desc or timeline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        []
+      ]
+    },
+    "Merged Input": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Project Desc file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File - Proj desc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Project Timeline File": {
+      "main": [
+        [
+          {
+            "node": "Extract from File - proj timeline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File - Proj desc": {
+      "main": [
+        [
+          {
+            "node": "Merged Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File - proj timeline": {
+      "main": [
+        [
+          {
+            "node": "Aggregate-Proj timeline list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch-Proj desc or timeline": {
+      "main": [
+        [
+          {
+            "node": "Download Project Desc file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download Project Timeline File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter-proj desc or timeline": {
+      "main": [
+        [
+          {
+            "node": "Switch-Proj desc or timeline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        []
+      ]
+    },
+    "Aggregate-Proj timeline list": {
+      "main": [
+        [
+          {
+            "node": "Merged Input",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b4c57fa6-87a6-4b6d-be16-e17d97adcb5d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8481bcb25d5b93645770b91f873fec4a742096fe92931e7fc2cafb117f2331b4"
+  },
+  "nodeGroups": [],
+  "id": "0jvPgwZ7xy8Uqy2K",
+  "tags": []
+}
